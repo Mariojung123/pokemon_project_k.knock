@@ -12,15 +12,19 @@ struct monster
     int ad; //공격력
     int hp; //체력
 };
-
+int money=10000;
 int choice=0;
 int monster_ball=0;
 int good_spray=0;
+int poke_num=0;
+int p_num=0;
 int pokemon_choice(int pokemon);
 int hello_user(int num);
 int go_adventure(int path);
 int shopping(int shop);
 int monster_field(int mob);
+struct monster mob[10]; //몬스터 담을 구조체 배열 선언
+struct monster my_poke[6]; //내 포켓몬 구조체 배열 선언
 FILE *fp; //파일 포인터 선언
 
 int main(){
@@ -34,27 +38,35 @@ int main(){
 
     mobfp=fopen("mob_list.txt","r"); //몬스터 파일 열기
 
-    struct monster mob[10]; //몬스터 담을 구조체 배열 선언
-
     fscanf(mobfp,"%d",&mob_num); //몬스터 몇마리인지 출력
 
     // fseek(mobfp,6L,SEEK_SET); //기준점을 바꾸어보려함
 
-    for(int i=0; i<10; i++){ //몬스터 가져오기
+    for(int i=0; i<mob_num; i++){ //몬스터 가져오기
         fscanf(mobfp,"%s %s %d %d %d",&mob[i].name,&mob[i].special_name,&mob[i].color,&mob[i].ad,&mob[i].hp);
     } 
 
     fclose(mobfp); //몬스터 파일 닫기
-
 
     
     int check=hello_user(0); //시작 화면 출력
 
     if(check==1){ //쓰기 모드로 시작
         fp = fopen("pokemon_directory.txt","w"); 
+        p_num=pokemon_choice(0)-1; //포켓몬 정하기 함술
+        my_poke[0]=id[p_num];
+        poke_num++;
+        go_adventure(0);
     }
     else{ //이어서 시작
-        fp = fopen("pokemon_directory.txt","a"); 
+        fp = fopen("pokemon_directory.txt","r");
+        fscanf(fp,"%d %d %d %d",&monster_ball,&good_spray,&poke_num,&money); //아이템 부르기
+        for(int i=0; i<poke_num; i++){ //내 포켓몬 불러오기
+            fscanf(fp,"%s %s %d %d %d",&my_poke[i].name,&my_poke[i].special_name,&my_poke[i].color,&my_poke[i].ad,&my_poke[i].hp);
+        }
+        fclose(fp);
+        go_adventure(0);
+
     }
 
 
@@ -63,7 +75,6 @@ int main(){
     // puts(""); //랜덤 출력
 
 
-    int selected_pokemon=pokemon_choice(0); //포켓몬 정하기 함술
 
 return 0;
 }
@@ -86,7 +97,7 @@ int pokemon_choice(int pokemon){ //포켓몬 정하기
     scanf("%d",&pokemon);
     printf("선택한 포켓몬: %d\n", pokemon);
     
-    go_adventure(0);
+    
 return pokemon;
 }
 
@@ -104,8 +115,11 @@ int go_adventure(int path){ //상점,여행 떠나기
         printf("저장하시겠습니까? (Y/N) : ");
         scanf("%s",&load);
             if(load=='Y'){
-                // fp=fopen("pokemon_directory.txt","a");
-
+                fp=fopen("pokemon_directory.txt","w");
+                fprintf(fp,"%d %d %d %d\n",monster_ball,good_spray,poke_num,money);
+                for(int i=0; i<poke_num; i++){
+                    fprintf(fp,"%s %s %d %d %d \n",my_poke[i].name,my_poke[i].special_name,my_poke[i].color,my_poke[i].ad,my_poke[i].hp);
+                }
                 fclose(fp);
             }
             else return 0;
@@ -118,7 +132,7 @@ return path;
 }
 
 int shopping(int shop){ //상점
-    static int money=10000;
+    
     
     char perdon=3;
     int ball_price=1000;
