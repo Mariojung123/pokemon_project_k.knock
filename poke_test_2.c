@@ -22,7 +22,7 @@ int pokemon_choice(int pokemon);
 int hello_user(int num);
 int go_adventure(int path);
 int shopping(int shop);
-int monster_field(int mob);
+int monster_field(int monster);
 struct monster mob[10]; //몬스터 담을 구조체 배열 선언
 struct monster my_poke[6]; //내 포켓몬 구조체 배열 선언
 FILE *fp; //파일 포인터 선언
@@ -30,6 +30,8 @@ FILE *fp; //파일 포인터 선언
 int main(){
     int mob_num=0; //몬스터 개체수
     srand(time(NULL)); //시간 초기화
+
+
     struct monster id[3]={{"파이리","파이리",0,rand()%(150-101)+100,rand()%(1000-501)+500},
                             {"이상해씨","이상해씨",1,rand()%(150-101)+100,rand()%(1000-501)+500},
                             {"꼬부기","꼬부기",2,rand()%(150-101)+100,rand()%(1000-501)+500}};
@@ -44,7 +46,10 @@ int main(){
 
     for(int i=0; i<mob_num; i++){ //몬스터 가져오기
         fscanf(mobfp,"%s %s %d %d %d",&mob[i].name,&mob[i].special_name,&mob[i].color,&mob[i].ad,&mob[i].hp);
-    } 
+    }
+    for(int i=0;i<mob_num; i++){
+        printf("%s %s %d %d %d\n",mob[i].name,mob[i].special_name,mob[i].color,mob[i].ad,mob[i].hp);
+    }
 
     fclose(mobfp); //몬스터 파일 닫기
 
@@ -70,9 +75,7 @@ int main(){
     }
 
 
-    // int ran_num=rand()%10;
-    // printf("%s %s %d %d %d",mob[ran_num].name,mob[ran_num].special_name,mob[ran_num].color,mob[ran_num].ad,mob[ran_num].hp);
-    // puts(""); //랜덤 출력
+
 
 
 
@@ -211,19 +214,26 @@ int shopping(int shop){ //상점
 return 0;
 }
 
-int monster_field(int mob){ //몬스터 맞짱
+int monster_field(int monster){ //몬스터 맞짱
     int select=0;
 
     printf(" ====================\n  길을 걷는중........\n");
     sleep(2);
     printf(" ====================\n");
     printf("야생의 포켓몬이 나타났다!\n");
+    
+    srand(time(NULL)); //시간 초기화
+    int ran_num=rand()%10;
+
+    printf("%s %s %d %d %d",mob[ran_num].name ,mob[ran_num].special_name,mob[ran_num].color,mob[ran_num].ad,mob[ran_num].hp);
+    puts(""); //랜덤 출력
     printf("1. 공격 2. 도망치기 3. 가방 열기\n>> ");
     scanf("%d",&select);
 
     switch (select)
     {
     case 1: //공격하기
+        
         break;
 
     case 2: //도망가기
