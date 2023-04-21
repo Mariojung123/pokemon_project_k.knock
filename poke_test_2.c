@@ -12,6 +12,8 @@ struct monster
     int ad; //공격력
     int hp; //체력
 };
+int my_poke_num=0; //소환할 포켓몬 번호
+int full_hp=0;
 int money=10000;
 int choice=0;
 int monster_ball=0;
@@ -23,6 +25,7 @@ int hello_user(int num);
 int go_adventure(int path);
 int shopping(int shop);
 int monster_field(int monster);
+int damage(int my_num, int num);
 struct monster mob[10]; //몬스터 담을 구조체 배열 선언
 struct monster my_poke[6]; //내 포켓몬 구조체 배열 선언
 FILE *fp; //파일 포인터 선언
@@ -39,6 +42,10 @@ int main(){
     FILE *mobfp; //몬스터 파일 구조체 선언
 
     mobfp=fopen("mob_list.txt","r"); //몬스터 파일 열기
+    if(mobfp==NULL){
+        printf("파일 열기 실패");
+        return 0;
+    }
 
     fscanf(mobfp,"%d",&mob_num); //몬스터 몇마리인지 출력
 
@@ -55,8 +62,8 @@ int main(){
 
     
     int check=hello_user(0); //시작 화면 출력
-
-    if(check==1){ //쓰기 모드로 시작
+    //함수 들어갈 때 함수 안 함수는 메모리를 많이 잡으므로 반복문 형식으로 다시 돌아오게 만들기
+    if(check==1){ //쓰기 모드로 시작 
         fp = fopen("pokemon_directory.txt","w"); 
         p_num=pokemon_choice(0)-1; //포켓몬 정하기 함술
         my_poke[0]=id[p_num];
@@ -65,17 +72,19 @@ int main(){
     }
     else{ //이어서 시작
         fp = fopen("pokemon_directory.txt","r");
+            if(fp==NULL){
+                printf("파일 열기 실패");
+                return 0;
+            }
         fscanf(fp,"%d %d %d %d",&monster_ball,&good_spray,&poke_num,&money); //아이템 부르기
         for(int i=0; i<poke_num; i++){ //내 포켓몬 불러오기
             fscanf(fp,"%s %s %d %d %d",&my_poke[i].name,&my_poke[i].special_name,&my_poke[i].color,&my_poke[i].ad,&my_poke[i].hp);
         }
         fclose(fp);
         go_adventure(0);
+        
 
     }
-
-
-
 
 
 
@@ -124,9 +133,9 @@ int go_adventure(int path){ //상점,여행 떠나기
                     fprintf(fp,"%s %s %d %d %d \n",my_poke[i].name,my_poke[i].special_name,my_poke[i].color,my_poke[i].ad,my_poke[i].hp);
                 }
                 fclose(fp);
+                return 0;
             }
             else return 0;
-        return 0;
     }
     else if(path==3){
         shopping(0);
@@ -135,7 +144,6 @@ return path;
 }
 
 int shopping(int shop){ //상점
-    
     
     char perdon=3;
     int ball_price=1000;
@@ -215,33 +223,214 @@ return 0;
 }
 
 int monster_field(int monster){ //몬스터 맞짱
+
     int select=0;
+    float hp_per=0;
 
     printf(" ====================\n  길을 걷는중........\n");
     sleep(2);
     printf(" ====================\n");
     printf("야생의 포켓몬이 나타났다!\n");
     
-    srand(time(NULL)); //시간 초기화
     int ran_num=rand()%10;
-
     printf("%s %s %d %d %d",mob[ran_num].name ,mob[ran_num].special_name,mob[ran_num].color,mob[ran_num].ad,mob[ran_num].hp);
     puts(""); //랜덤 출력
-    printf("1. 공격 2. 도망치기 3. 가방 열기\n>> ");
-    scanf("%d",&select);
+    full_hp = mob[ran_num].hp; // 피통 초기값
 
-    switch (select)
-    {
-    case 1: //공격하기
+
+    while(select!=2 || mob[ran_num].hp>0){
+        if(mob[ran_num].hp>0){
+            printf("1. 공격 2. 도망치기 3. 가방 열기\n>> ");
+            scanf("%d",&select);
         
-        break;
+            switch (select){
+            case 1: //공격하기
+                printf("hp: %d \n",mob[ran_num].hp);
+                
+                if(my_poke[my_poke_num].color==0){ //내가 불속성일 떄
+                    if(mob[ran_num].color==0){
+                        mob[ran_num].hp-=my_poke[my_poke_num].ad;
+                        printf("hp: %d \n",mob[ran_num].hp);
+                        printf("효과는 의미없다.\n");
+                    }
+                    else if(mob[ran_num].color==1){
+                        mob[ran_num].hp-=1.5*my_poke[my_poke_num].ad;
+                        printf("hp: %d \n",mob[ran_num].hp);
+                        printf("효과는 굉장했다.\n");
+                    }
+                    else if(mob[ran_num].color==2){
+                        mob[ran_num].hp-=0.5*my_poke[my_poke_num].ad;
+                        printf("hp: %d \n",mob[ran_num].hp);
+                        printf("효과가 별로인 듯 하다.\n");
+                    }
+                }
 
-    case 2: //도망가기
-        break;
+                else if(my_poke[my_poke_num].color==1){ //내가 풀속성일 떄
+                        if(mob[ran_num].color==0){
+                            mob[ran_num].hp-=0.5*my_poke[my_poke_num].ad;
+                            printf("hp: %d \n",mob[ran_num].hp);
+                            printf("효과가 별로인 듯 하다.\n");
+                        }
+                        else if(mob[ran_num].color==1){
+                            mob[ran_num].hp-=my_poke[my_poke_num].ad;
+                            printf("hp: %d \n",mob[ran_num].hp);
+                            printf("효과는 의미없다.\n");
+                        }
+                        else if(mob[ran_num].color==2){
+                            mob[ran_num].hp-=1.5*my_poke[my_poke_num].ad;
+                            printf("hp: %d \n",mob[ran_num].hp);
+                            printf("효과는 굉장했다.\n");
+                        }
+                }
 
-    case 3: //가방 열기
-        break;
+                else if(my_poke[my_poke_num].color==2){ //내가 물속성일 떄
+                        if(mob[ran_num].color==0){
+                            mob[ran_num].hp-=1.5*my_poke[my_poke_num].ad;
+                            printf("hp: %d \n",mob[ran_num].hp);
+                            printf("효과는 굉장했다.\n");
+                        }
+                        else if(mob[ran_num].color==1){
+                            mob[ran_num].hp-=0.5*my_poke[my_poke_num].ad;
+                            printf("hp: %d \n",mob[ran_num].hp);
+                            printf("효과가 별로인 듯 하다.\n");
+                        }
+                        else if(mob[ran_num].color==2){
+                            mob[ran_num].hp-=my_poke[my_poke_num].hp;
+                            printf("hp: %d \n",mob[ran_num].hp);
+                            printf("효과는 의미없다.\n");
+                        }
+                }
+                
+                damage(my_poke_num,ran_num); //상대가 나에게 공격
 
+                if(mob[ran_num].hp<0){ //몬스터가 죽을 떄
+                    printf("애가 죽어버렸다...\n");
+                    go_adventure(0);
+                    return 0;
+                }
+                else if(mob[ran_num].hp==0){ // 상대 피통이 0일 때
+                    printf("앗! 포켓몬이 런쳤다...\n");
+                    go_adventure(0);
+                    return 0;
+                }
+                else if(my_poke[my_poke_num].hp<=0){ //내가 죽으면 할 짓
+                    my_poke[my_poke_num].hp=0; //음수 안나오게 정리
+
+                    int stay=0;
+                    for(int i=0; i<my_poke_num; i++){
+                        if(my_poke[i].hp > 0) stay++;
+                    }
+                    if(stay==0){
+                        printf("정신이 아득해진다....\n");
+                        puts("");
+                        sleep(2);
+                        go_adventure(0);
+                        printf("stay: %d",stay);
+                        return 0;
+                    }
+                    else{
+                        printf(" ====================\n");
+                        //여기에 나의 몬스터 뽑을거 해줘야함
+                        return 0;
+                    }
+                }
+                
+                break;
+                
+            case 2: //도망가기
+                printf("%d\n",full_hp);
+                printf("%d\n",mob[ran_num].hp);
+                hp_per = (float)(mob[ran_num].hp)/full_hp; //체력 퍼센트까지 했으니 그 다음에 도망가는 부분 완성해야함
+
+                printf("%f\n",hp_per*100);
+                go_adventure(0);
+                return 0;
+                break;
+
+            case 3: //가방 열기
+                if(monster_ball==0 && good_spray==0){
+                    printf("가방이 비었노?\n");
+                    // 전투 상황으로 복귀
+                }
+                else{
+                    int item=0;
+                    printf(" ====================\n");
+                    printf("1. 몬스터볼  x%d\n2.회복 물약  x%d\n",monster_ball,good_spray);
+                    printf("어떤 아이템을 사용하시겠습니까?: ");
+                    scanf("%d",&item);
+                    printf("%d 번을 선택하셨습니다.\n",item);
+                    
+                }
+                break;
+            }
+        }
     }
-return mob;
+
+return monster;
 }
+
+
+int damage(int my_num, int num){ //상대 공격 처리
+    int dam=0;
+    dam=mob[num].ad;
+
+    if(mob[num].color==0){ //상대가 불속성일 떄
+        if(my_poke[my_num].color==0){
+            my_poke[my_num].hp-=mob[num].ad;
+            printf("나의 hp: %d \n",my_poke[my_num].hp);
+            printf("효과는 의미없다.\n");
+        }
+        else if(my_poke[my_num].color==1){
+            my_poke[my_num].hp-=1.5*mob[num].ad;
+            printf("나의 hp: %d \n",my_poke[my_num].hp);
+            printf("상대는 강력하다.\n");
+        }
+        else if(my_poke[my_num].color==2){
+            my_poke[my_num].hp-=0.5*mob[num].ad;
+            printf("나의 hp: %d \n",my_poke[my_num].hp);
+            printf("상대는 약하다.\n");
+        }
+    }
+
+    else if(mob[num].color==1){ //상대가 풀속성일 떄
+            if(my_poke[my_num].color==0){
+                my_poke[my_num].hp-=0.5*mob[num].ad;
+                printf("나의 hp: %d \n",my_poke[my_num].hp);
+                printf("상대는 약하다.\n");
+            }
+            else if(my_poke[my_num].color==1){
+                my_poke[my_num].hp-=mob[num].ad;
+                printf("나의 hp: %d \n",my_poke[my_num].hp);
+                printf("효과는 의미없다.\n");
+            }
+            else if(my_poke[my_num].color==2){
+                my_poke[my_num].hp-=1.5*mob[num].ad;
+                printf("나의 hp: %d \n",my_poke[my_num].hp);
+                printf("상대는 강력하다.\n");
+            }
+    }
+
+    else if(mob[num].color==2){ //상대가 물속성일 떄
+            if(my_poke[my_num].color==0){
+                my_poke[my_num].hp-=1.5*mob[num].ad;
+                printf("나의 hp: %d \n",my_poke[my_num].hp);
+                printf("상대는 강력하다.\n");
+            }
+            else if(my_poke[my_num].color==1){
+                my_poke[my_num].hp-=0.5*mob[num].ad;
+                printf("나의 hp: %d \n",my_poke[my_num].hp);
+                printf("상대는 약하다.\n");
+            }
+            else if(my_poke[my_num].color==2){
+                my_poke[my_num].hp-=mob[num].hp;
+                printf("나의 hp: %d \n",my_poke[my_num].hp);
+                printf("효과는 의미없다.\n");
+            }
+    }
+    
+return 0;
+}
+
+// // int another_poke(int num){
+
+// }
