@@ -82,6 +82,7 @@ int main(){
         }
         fclose(fp);
         go_adventure(0);
+        
 
     }
 
@@ -132,9 +133,9 @@ int go_adventure(int path){ //상점,여행 떠나기
                     fprintf(fp,"%s %s %d %d %d \n",my_poke[i].name,my_poke[i].special_name,my_poke[i].color,my_poke[i].ad,my_poke[i].hp);
                 }
                 fclose(fp);
+                return 0;
             }
             else return 0;
-        return 0;
     }
     else if(path==3){
         shopping(0);
@@ -231,13 +232,13 @@ int monster_field(int monster){ //몬스터 맞짱
     printf(" ====================\n");
     printf("야생의 포켓몬이 나타났다!\n");
     
-    
     int ran_num=rand()%10;
     printf("%s %s %d %d %d",mob[ran_num].name ,mob[ran_num].special_name,mob[ran_num].color,mob[ran_num].ad,mob[ran_num].hp);
     puts(""); //랜덤 출력
     full_hp = mob[ran_num].hp; // 피통 초기값
 
-    while(select==2 || mob[ran_num].hp>0){
+
+    while(select!=2 || mob[ran_num].hp>0){
         if(mob[ran_num].hp>0){
             printf("1. 공격 2. 도망치기 3. 가방 열기\n>> ");
             scanf("%d",&select);
@@ -301,7 +302,39 @@ int monster_field(int monster){ //몬스터 맞짱
                 }
                 
                 damage(my_poke_num,ran_num); //상대가 나에게 공격
-            
+
+                if(mob[ran_num].hp<0){ //몬스터가 죽을 떄
+                    printf("애가 죽어버렸다...\n");
+                    go_adventure(0);
+                    return 0;
+                }
+                else if(mob[ran_num].hp==0){ // 상대 피통이 0일 때
+                    printf("앗! 포켓몬이 런쳤다...\n");
+                    go_adventure(0);
+                    return 0;
+                }
+                else if(my_poke[my_poke_num].hp<=0){ //내가 죽으면 할 짓
+                    my_poke[my_poke_num].hp=0; //음수 안나오게 정리
+
+                    int stay=0;
+                    for(int i=0; i<my_poke_num; i++){
+                        if(my_poke[i].hp > 0) stay++;
+                    }
+                    if(stay==0){
+                        printf("정신이 아득해진다....\n");
+                        puts("");
+                        sleep(2);
+                        go_adventure(0);
+                        printf("stay: %d",stay);
+                        return 0;
+                    }
+                    else{
+                        printf(" ====================\n");
+                        //여기에 나의 몬스터 뽑을거 해줘야함
+                        return 0;
+                    }
+                }
+                
                 break;
                 
             case 2: //도망가기
@@ -315,21 +348,23 @@ int monster_field(int monster){ //몬스터 맞짱
                 break;
 
             case 3: //가방 열기
-            
+                if(monster_ball==0 && good_spray==0){
+                    printf("가방이 비었노?\n");
+                    // 전투 상황으로 복귀
+                }
+                else{
+                    int item=0;
+                    printf(" ====================\n");
+                    printf("1. 몬스터볼  x%d\n2.회복 물약  x%d\n",monster_ball,good_spray);
+                    printf("어떤 아이템을 사용하시겠습니까?: ");
+                    scanf("%d",&item);
+                    printf("%d 번을 선택하셨습니다.\n",item);
+                    
+                }
                 break;
             }
         }
     }
-
-    if(mob[ran_num].hp<0){
-        printf("애가 죽어버렸다...\n");
-        go_adventure(0);
-    }
-    else if(mob[ran_num].hp==0){
-        printf("앗! 포켓몬이 런쳤다...\n");
-        go_adventure(0);
-    }
-    
 
 return monster;
 }
@@ -393,7 +428,7 @@ int damage(int my_num, int num){ //상대 공격 처리
             }
     }
     
-return my_num;
+return 0;
 }
 
 // // int another_poke(int num){

@@ -13,7 +13,8 @@ struct monster
     int hp; //체력
 };
 int my_poke_num=0; //소환할 포켓몬 번호
-int full_hp=0;
+int mob_full_hp=0;
+int my_full_hp=0;
 int money=10000;
 int choice=0;
 int monster_ball=0;
@@ -235,7 +236,8 @@ int monster_field(int monster){ //몬스터 맞짱
     int ran_num=rand()%10;
     printf("%s %s %d %d %d",mob[ran_num].name ,mob[ran_num].special_name,mob[ran_num].color,mob[ran_num].ad,mob[ran_num].hp);
     puts(""); //랜덤 출력
-    full_hp = mob[ran_num].hp; // 피통 초기값
+    mob_full_hp = mob[ran_num].hp; // 상대 피통 초기값
+    my_full_hp=my_poke[my_poke_num].hp;
 
 
     while(select!=2 || mob[ran_num].hp>0){
@@ -338,9 +340,9 @@ int monster_field(int monster){ //몬스터 맞짱
                 break;
                 
             case 2: //도망가기
-                printf("%d\n",full_hp);
+                printf("%d\n",mob_full_hp);
                 printf("%d\n",mob[ran_num].hp);
-                hp_per = (float)(mob[ran_num].hp)/full_hp; //체력 퍼센트까지 했으니 그 다음에 도망가는 부분 완성해야함
+                hp_per = (float)(mob[ran_num].hp)/mob_full_hp; //체력 퍼센트까지 했으니 그 다음에 도망가는 부분 완성해야함
 
                 printf("%f\n",hp_per*100);
                 go_adventure(0);
@@ -377,17 +379,17 @@ int damage(int my_num, int num){ //상대 공격 처리
     if(mob[num].color==0){ //상대가 불속성일 떄
         if(my_poke[my_num].color==0){
             my_poke[my_num].hp-=mob[num].ad;
-            printf("나의 hp: %d \n",my_poke[my_num].hp);
+            printf("나의 hp: %d / %d\n",my_poke[my_num].hp,my_full_hp);
             printf("효과는 의미없다.\n");
         }
-        else if(my_poke[my_num].color==1){
+        else if(my_poke[my_num].color==1){ //상대가 풀속성일 때
             my_poke[my_num].hp-=1.5*mob[num].ad;
-            printf("나의 hp: %d \n",my_poke[my_num].hp);
+            printf("나의 hp: %d / %d\n",my_poke[my_num].hp,my_full_hp);
             printf("상대는 강력하다.\n");
         }
-        else if(my_poke[my_num].color==2){
+        else if(my_poke[my_num].color==2){ //상대가 물속성일 때
             my_poke[my_num].hp-=0.5*mob[num].ad;
-            printf("나의 hp: %d \n",my_poke[my_num].hp);
+            printf("나의 hp: %d / %d\n",my_poke[my_num].hp,my_full_hp);
             printf("상대는 약하다.\n");
         }
     }
@@ -431,6 +433,18 @@ int damage(int my_num, int num){ //상대 공격 처리
 return 0;
 }
 
+// int item(int item){
+
+//     if(item==1){
+//         printf("가랏 몬스터볼!\n");
+//         //몬스터 체력에 따라서 단계 구분
+//     }
+//     else if(item==2){
+//         printf("회복 물약 사용했다.");
+        
+//     }
+
+// }
 // // int another_poke(int num){
 
 // }
